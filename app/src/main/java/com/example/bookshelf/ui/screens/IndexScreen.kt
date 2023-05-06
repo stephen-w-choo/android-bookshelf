@@ -41,8 +41,15 @@ fun IndexScreen(
         )
         when (bookshelfViewModel.bookshelfUiState) {
             is BookshelfUiState.NoBooks -> {}
-            is BookshelfUiState.Loading -> {}
-            is BookshelfUiState.Error -> {}
+            is BookshelfUiState.Loading -> {
+                LoadingScreen(modifier = modifier)
+            }
+            is BookshelfUiState.Error -> {
+                ErrorScreen(
+                    bookshelfViewModel = bookshelfViewModel,
+                    modifier = modifier
+                )
+            }
             is BookshelfUiState.Success -> {
                 // log success
                 Log.d("BookshelfViewModel", "Loading bookshelf screen")
@@ -90,47 +97,3 @@ fun SearchBar(
     }
 }
 
-@Composable
-fun BookshelfScreen(
-    bookshelfUiState: BookshelfUiState,
-    modifier: Modifier = Modifier
-) {
-    val books = (bookshelfUiState as BookshelfUiState.Success).books
-
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(200.dp),
-        modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(0.dp),
-        verticalArrangement = Arrangement.spacedBy((-40).dp)
-        // note - this feels bad, but there's a source of vertical spacing somewhere in AsyncImage that I can't get rid of
-    ) {
-        items(books) { book ->
-            BookCard(
-                book = book,
-                modifier = modifier
-            )
-        }
-    }
-}
-
-@Composable
-fun BookCard(
-    book: Book,
-    modifier: Modifier = Modifier
-) {
-    val url = book.volumeInfo.imageLinks.thumbnail
-    val httpsUrl = url.replace("http", "https")
-    val imageRequest = ImageRequest.Builder(context = LocalContext.current)
-        .data(httpsUrl)
-        .build()
-
-    AsyncImage(
-        model = imageRequest,
-        contentDescription = book.volumeInfo.title,
-        contentScale = ContentScale.Crop,
-        alignment = Alignment.Center,
-        modifier = modifier
-            .padding(4.dp)
-    )
-
-}

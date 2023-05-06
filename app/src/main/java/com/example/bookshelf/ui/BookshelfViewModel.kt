@@ -21,7 +21,7 @@ import java.io.IOException
 sealed interface BookshelfUiState {
     object NoBooks : BookshelfUiState
     object Loading : BookshelfUiState
-    object Error : BookshelfUiState
+    data class Error(val error: String) : BookshelfUiState
     data class Success(val books: List<Book>) : BookshelfUiState
 }
 
@@ -34,10 +34,6 @@ class BookshelfViewModel(
     var currentSearchQuery: String by mutableStateOf("")
         private set
 
-    init {
-        getBooks(searchQuery = "cicero")
-    }
-
     fun updateSearchQuery(searchQuery: String) {
         currentSearchQuery = searchQuery
     }
@@ -47,16 +43,21 @@ class BookshelfViewModel(
     }
 
     private fun getBooks(searchQuery: String) {
+        bookshelfUiState = BookshelfUiState.Loading
         viewModelScope.launch {
             bookshelfUiState = try {
                 val apiResult = bookshelfRepository.getBooks(searchQuery)
                 // log success
                 Log.d("BookshelfViewModel", "Success: $apiResult")
-                BookshelfUiState.Success(apiResult)
+                if (apiResult.isEmpty()) {
+                    BookshelfUiState.Error("No books found")
+                } else {
+                    BookshelfUiState.Success(apiResult)
+                }
             } catch (e: IOException) {
                 // log error
                 Log.e("BookshelfViewModel", "Error: $e")
-                BookshelfUiState.Error
+                BookshelfUiState.Error(e.toString())
             } //catch (e: Exception) {
                 // catch other exceptions here
                 //BookshelfUiState.Error
