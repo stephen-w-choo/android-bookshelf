@@ -26,7 +26,7 @@ fun BookshelfScreen(
     val books = (bookshelfUiState as BookshelfUiState.Success).books
 
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(200.dp),
+        columns = GridCells.Adaptive(180.dp),
         modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(0.dp),
         verticalArrangement = Arrangement.spacedBy((-40).dp)
